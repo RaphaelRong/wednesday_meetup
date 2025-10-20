@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wednesday Meetup - 活动目录</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
+            color: #ffffff;
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            position: relative;
+        }
+
+        /* 金属质感背景纹理 */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.02) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.02) 0%, transparent 50%),
+                linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.01) 50%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .container {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .scroll-container {
+            width: 100%;
+            max-width: 800px;
+            height: 80vh;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .scroll-content {
+            position: absolute;
+            width: 100%;
+            animation: scroll 600s linear infinite;
+            padding: 2rem 0;
+        }
+        
+        /* 循环滚动 - 复制内容实现无缝循环 */
+        .scroll-content::after {
+            content: '';
+            display: block;
+            height: 100%;
+        }
+
+        .meetup-item {
+            padding: 1.5rem 2rem;
+            margin: 0.5rem 1rem;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            backdrop-filter: blur(5px);
+            transition: all 0.6s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* 中间区域高亮效果 */
+        .meetup-item.highlight {
+            transform: translateX(15px) scale(1.02);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 
+                0 8px 32px rgba(255, 255, 255, 0.2),
+                0 0 20px rgba(255, 255, 255, 0.1);
+        }
+        
+        .meetup-item.highlight .meetup-title {
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+        
+        .meetup-item.highlight .meetup-date {
+            color: #ffffff;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+        }
+
+        .meetup-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .meetup-item:hover::before {
+            left: 100%;
+        }
+
+
+        .meetup-title {
+            font-size: 1.1rem;
+            font-weight: 500;
+            line-height: 1.4;
+            color: #ffffff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .meetup-date {
+            font-size: 0.9rem;
+            color: #cccccc;
+            margin-bottom: 0.5rem;
+            font-weight: 300;
+        }
+
+        .meetup-theme {
+            font-size: 1rem;
+            color: #ffffff;
+            font-weight: 400;
+        }
+
+        /* 渐变遮罩 */
+        .scroll-container::before,
+        .scroll-container::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 50px;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .scroll-container::before {
+            top: 0;
+            background: linear-gradient(to bottom, rgba(26, 26, 26, 1), rgba(26, 26, 26, 0));
+        }
+
+        .scroll-container::after {
+            bottom: 0;
+            background: linear-gradient(to top, rgba(26, 26, 26, 1), rgba(26, 26, 26, 0));
+        }
+
+        /* 滚动动画 */
+        @keyframes scroll {
+            0% {
+                transform: translateY(100vh);
+            }
+            100% {
+                transform: translateY(-100%);
+            }
+        }
+
+        /* 中间区域检测区域 */
+        .highlight-zone {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 40px;
+            transform: translateY(-50%);
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .scroll-container {
+                height: 70vh;
+            }
+            
+            .meetup-item {
+                padding: 1rem 1.5rem;
+                margin: 0.3rem 0.5rem;
+            }
+            
+            .meetup-title {
+                font-size: 1rem;
+            }
+            
+            .meetup-theme {
+                font-size: 0.9rem;
+            }
+        }
+
+        /* 标题 */
+        .page-title {
+            position: absolute;
+            top: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 2rem;
+            font-weight: 300;
+            color: #ffffff;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            z-index: 20;
+        }
+
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: 1.5rem;
+                top: 1rem;
+            }
+        }
+
+        /* 音乐控制按钮样式 */
+        .music-controls {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            z-index: 30;
+        }
+
+        .music-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            padding: 0.8rem 1.2rem;
+            color: #ffffff;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .music-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .music-btn:active {
+            transform: translateY(0);
+        }
+
+        .music-btn.playing {
+            background: rgba(76, 175, 80, 0.3);
+            border-color: rgba(76, 175, 80, 0.5);
+        }
+
+        .music-btn.playing:hover {
+            background: rgba(76, 175, 80, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .music-controls {
+                top: 1rem;
+                right: 1rem;
+            }
+            
+            .music-btn {
+                padding: 0.6rem 1rem;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1 class="page-title">DIIS实践工坊 X 周三小聚</h1>
+    
+    <!-- 背景音乐控制 -->
+    <div class="music-controls">
+        <button id="musicToggle" class="music-btn">
+            <span id="musicIcon">🎵</span>
+            <span id="musicText">播放音乐</span>
+        </button>
+    </div>
+    
+    <!-- 背景音乐 -->
+    <audio id="backgroundMusic" loop>
+        <source src="conclusion.mp3" type="audio/mpeg">
+        您的浏览器不支持音频播放。
+    </audio>
+    
+    <div class="container">
+        <div class="scroll-container">
+            <div class="highlight-zone"></div>
+            <div class="scroll-content" id="scrollContent">
+                <!-- 内容将由JavaScript动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 活动数据
+        const meetupData = [
+            { date: "2024-09-17", title: "Laser OS 和互动激光制作" },
+            { date: "2024-09-25", title: "音乐工作室 pre-opening" },
+            { date: "2024-10-09", title: "Maker Fair & 科技艺术的商业探索 & 科技Hacking魔术" },
+            { date: "2024-10-16", title: "城市空间连接 & 机器人声光就把 & 艺术家对话" },
+            { date: "2024-10-23", title: "让 AI 成为你的 minions & touchDesigner 关节动作提取 & 花花的土味制造" },
+            { date: "2024-10-30", title: "关于D-Transformer 孵化器" },
+            { date: "2024-11-06", title: "Jam Night" },
+            { date: "2024-11-13", title: "艺术+科技类书籍分享" },
+            { date: "2024-11-20", title: "体验光明之城" },
+            { date: "2024-12-04", title: "体验沉浸式体验 & 交流" },
+            { date: "2024-12-11", title: "城市艺术项目探索与Clew" },
+            { date: "2024-12-18", title: "AI与礼物交换派对" },
+            { date: "2025-01-08", title: "我有屠龙之术 DJ & VJ" },
+            { date: "2025-01-15", title: "小红书生存指南" },
+            { date: "2025-02-19", title: "还原剧团 & 3D scanning" },
+            { date: "2025-02-26", title: "黑灯音乐会 & 感官重启计划" },
+            { date: "2025-03-05", title: "干活之夜! Work Work Night!" },
+            { date: "2025-03-12", title: "2025大会、AI音乐灯光秀、3D打印" },
+            { date: "2025-03-19", title: "OpenPilot 开源自动驾驶实践" },
+            { date: "2025-03-26", title: "AI 编程 & Sneak Peek" },
+            { date: "2025-04-02", title: "Silent work night" },
+            { date: "2025-04-09", title: "Bach or Rock night" },
+            { date: "2025-04-16", title: "Beyond the Five Senses" },
+            { date: "2025-04-23", title: "P5 2.0 and I Ching" },
+            { date: "2025-04-30", title: "魏晋专场" },
+            { date: "2025-05-07", title: "DigiShow after Sundown" },
+            { date: "2025-05-14", title: "一起来调试吧" },
+            { date: "2025-05-21", title: "宇树狗GO" },
+            { date: "2025-05-28", title: "ERRANCE after sundown" },
+            { date: "2025-06-04", title: "碳不亦硅，硅不亦碳" },
+            { date: "2025-06-11", title: "协同协议与艺术重构" },
+            { date: "2025-06-18", title: "XAVR与绘画中的新现实主义" },
+            { date: "2025-06-25", title: "考察INS新乐园" },
+            { date: "2025-07-02", title: "小红书MCP实践与构成主义分享" },
+            { date: "2025-07-09", title: "真实的光谱与虚幻的AIGC" },
+            { date: "2025-07-16", title: "星空与类器官" },
+            { date: "2025-07-23", title: "中西方魔术发展史&世界魔术大赛全新创意赏析" },
+            { date: "2025-07-30", title: "因台风延后" },
+            { date: "2025-08-06", title: "上海近代百年建筑营造商发展史与工业级特效软件Houdini介绍" },
+            { date: "2025-08-13", title: "重返1919：书里书外的包豪斯狂想" },
+            { date: "2025-08-20", title: "自由讨论与内部观影" },
+            { date: "2025-08-27", title: "基于AIGC的文学解构与碰撞" },
+            { date: "2025-09-03", title: "爆闪灯主题夜" },
+            { date: "2025-09-10", title: "AIGC感官实验 50天挑战进行时" },
+            { date: "2025-09-17", title: "卡尔维诺的立方体游戏与符号化之音" },
+            { date: "2025-09-24", title: "环顾 x 回顾" }
+        ];
+        
+        // 动态生成5次循环内容
+        function generateScrollContent() {
+            const scrollContent = document.getElementById('scrollContent');
+            let html = '';
+            
+            // 生成5次循环
+            for (let i = 0; i < 5; i++) {
+                meetupData.forEach(item => {
+                    html += `
+                        <div class="meetup-item">
+                            <div class="meetup-date">${item.date}</div>
+                            <div class="meetup-title">${item.title}</div>
+                        </div>
+                    `;
+                });
+            }
+            
+            scrollContent.innerHTML = html;
+        }
+        
+        // 初始化内容
+        generateScrollContent();
+        
+        // 中间区域检测和高亮效果
+        const scrollContainer = document.querySelector('.scroll-container');
+        const highlightZone = document.querySelector('.highlight-zone');
+        
+        // 检测元素是否在中间区域
+        function checkHighlightZone() {
+            const highlightRect = highlightZone.getBoundingClientRect();
+            const meetupItems = document.querySelectorAll('.meetup-item');
+            
+            meetupItems.forEach(item => {
+                const itemRect = item.getBoundingClientRect();
+                
+                // 检查元素是否与中间区域重叠
+                const isInZone = !(itemRect.bottom < highlightRect.top || itemRect.top > highlightRect.bottom);
+                
+                if (isInZone) {
+                    item.classList.add('highlight');
+                } else {
+                    item.classList.remove('highlight');
+                }
+            });
+        }
+        
+        // 定期检查中间区域
+        setInterval(checkHighlightZone, 100);
+        
+        // 初始检查
+        checkHighlightZone();
+        
+        // 背景音乐控制
+        const backgroundMusic = document.getElementById('backgroundMusic');
+        const musicToggle = document.getElementById('musicToggle');
+        const musicIcon = document.getElementById('musicIcon');
+        const musicText = document.getElementById('musicText');
+        
+        let isPlaying = false;
+        
+        // 音乐控制函数
+        function toggleMusic() {
+            if (isPlaying) {
+                backgroundMusic.pause();
+                musicIcon.textContent = '🎵';
+                musicText.textContent = '播放音乐';
+                musicToggle.classList.remove('playing');
+                isPlaying = false;
+            } else {
+                backgroundMusic.play().then(() => {
+                    musicIcon.textContent = '⏸️';
+                    musicText.textContent = '暂停音乐';
+                    musicToggle.classList.add('playing');
+                    isPlaying = true;
+                }).catch(error => {
+                    console.log('音频播放失败:', error);
+                    // 如果自动播放失败，显示提示
+                    musicText.textContent = '点击播放';
+                });
+            }
+        }
+        
+        // 绑定点击事件
+        musicToggle.addEventListener('click', toggleMusic);
+        
+        // 页面加载完成后尝试自动播放（需要用户交互）
+        document.addEventListener('DOMContentLoaded', function() {
+            // 现代浏览器需要用户交互才能播放音频
+            // 这里只是准备音频，不自动播放
+            backgroundMusic.volume = 0.3; // 设置音量为30%
+        });
+        
+        // 监听音频事件
+        backgroundMusic.addEventListener('ended', function() {
+            // 由于设置了loop属性，这个事件通常不会触发
+            isPlaying = false;
+            musicIcon.textContent = '🎵';
+            musicText.textContent = '播放音乐';
+            musicToggle.classList.remove('playing');
+        });
+        
+        backgroundMusic.addEventListener('error', function(e) {
+            console.error('音频加载失败:', e);
+            musicText.textContent = '音频加载失败';
+        });
+    </script>
+</body>
+</html>
